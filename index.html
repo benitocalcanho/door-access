@@ -1,79 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Door Access</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
-        }
-        input {
-            padding: 10px;
-            font-size: 16px;
-            margin: 10px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            margin: 10px;
-            cursor: pointer;
-        }
-        .message {
-            font-size: 18px;
-            margin-top: 20px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Door Access</title>
 </head>
 <body>
+  <h1>Door Access</h1>
+  <label for="code">Enter Access Code:</label>
+  <input type="text" id="code" placeholder="Enter booking code">
+  <button onclick="openStreetDoor()">Open Street Door</button>
+  <button onclick="openApartmentDoor()">Open Apartment Door</button>
 
-<h1>Welcome to the Door Access System</h1>
-
-<label for="code">Enter Booking Code:</label>
-<input type="text" id="code" placeholder="Enter code">
-
-<div>
-    <button onclick="openDoor('street')">Open Street Door</button>
-    <button onclick="openDoor('apartment')">Open Apartment Door</button>
-</div>
-
-<div id="status" class="message"></div>
-
-<script>
-    const apiUrl = "http://192.168.1.145:8000";  // Update this if needed
-
-    function openDoor(doorType) {
-        const code = document.getElementById('code').value;
-
-        if (!code) {
-            document.getElementById('status').innerHTML = "Please enter a code!";
-            return;
-        }
-
-        const endpoint = doorType === 'street' ? "/open/street" : "/open/apartment";
-        
-        fetch(apiUrl + endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ code: code }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status) {
-                document.getElementById('status').innerHTML = `${doorType.charAt(0).toUpperCase() + doorType.slice(1)} door opened successfully.`;
-            } else {
-                document.getElementById('status').innerHTML = `Error: ${data.error}`;
-            }
-        })
-        .catch(error => {
-            document.getElementById('status').innerHTML = `Error: ${error}`;
-        });
+  <script>
+    async function openStreetDoor() {
+      const code = document.getElementById("code").value;
+      const response = await fetch("http://raspberrypi_ip_address:8000/open/street", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code: code }),
+      });
+      
+      const result = await response.json();
+      alert(result.status || "Error");
     }
-</script>
 
+    async function openApartmentDoor() {
+      const code = document.getElementById("code").value;
+      const response = await fetch("http://raspberrypi_ip_address:8000/open/apartment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code: code }),
+      });
+
+      const result = await response.json();
+      alert(result.status || "Error");
+    }
+  </script>
 </body>
 </html>
