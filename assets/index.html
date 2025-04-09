@@ -1,72 +1,79 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Access Control</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background-color: #f0f0f0;
-    }
-    h1 {
-      color: #333;
-    }
-    button {
-      padding: 1em 2em;
-      font-size: 1.2em;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 20px;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-    #status {
-      margin-top: 20px;
-      font-weight: bold;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Door Access</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        .message {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-  <h1>Welcome</h1>
-  <p>You can open the door during your booking period.</p>
-  <button id="openBtn">Open Door</button>
-  <div id="status"></div>
 
-  <script>
-    const code = new URLSearchParams(window.location.search).get("code");
-    const statusDiv = document.getElementById("status");
+<h1>Welcome to the Door Access System</h1>
 
-    if (!code) {
-      statusDiv.textContent = "Missing access code.";
-      document.getElementById("openBtn").disabled = true;
-    }
+<label for="code">Enter Booking Code:</label>
+<input type="text" id="code" placeholder="Enter code">
 
-    document.getElementById("openBtn").addEventListener("click", () => {
-      fetch(`/open?code=${encodeURIComponent(code)}`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error("Access denied or booking not valid.");
-          }
-          return response.json();
+<div>
+    <button onclick="openDoor('street')">Open Street Door</button>
+    <button onclick="openDoor('apartment')">Open Apartment Door</button>
+</div>
+
+<div id="status" class="message"></div>
+
+<script>
+    const apiUrl = "http://192.168.1.145:8000";  // Update this if needed
+
+    function openDoor(doorType) {
+        const code = document.getElementById('code').value;
+
+        if (!code) {
+            document.getElementById('status').innerHTML = "Please enter a code!";
+            return;
+        }
+
+        const endpoint = doorType === 'street' ? "/open/street" : "/open/apartment";
+        
+        fetch(apiUrl + endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ code: code }),
         })
+        .then(response => response.json())
         .then(data => {
-          statusDiv.textContent = "Door opened!";
+            if (data.status) {
+                document.getElementById('status').innerHTML = `${doorType.charAt(0).toUpperCase() + doorType.slice(1)} door opened successfully.`;
+            } else {
+                document.getElementById('status').innerHTML = `Error: ${data.error}`;
+            }
         })
         .catch(error => {
-          statusDiv.textContent = error.message;
+            document.getElementById('status').innerHTML = `Error: ${error}`;
         });
-    });
-  </script>
+    }
+</script>
+
 </body>
 </html>
