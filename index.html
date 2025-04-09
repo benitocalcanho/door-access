@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access Control</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #f0f0f0;
+    }
+    h1 {
+      color: #333;
+    }
+    button {
+      padding: 1em 2em;
+      font-size: 1.2em;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #status {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome</h1>
+  <p>You can open the door during your booking period.</p>
+  <button id="openBtn">Open Door</button>
+  <div id="status"></div>
+
+  <script>
+    const code = new URLSearchParams(window.location.search).get("code");
+    const statusDiv = document.getElementById("status");
+
+    if (!code) {
+      statusDiv.textContent = "Missing access code.";
+      document.getElementById("openBtn").disabled = true;
+    }
+
+    document.getElementById("openBtn").addEventListener("click", () => {
+      fetch(`/open?code=${encodeURIComponent(code)}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Access denied or booking not valid.");
+          }
+          return response.json();
+        })
+        .then(data => {
+          statusDiv.textContent = "Door opened!";
+        })
+        .catch(error => {
+          statusDiv.textContent = error.message;
+        });
+    });
+  </script>
+</body>
+</html>
